@@ -3,10 +3,10 @@ project(RealCarMonitor)
 
 set(CMAKE_CXX_STANDARD 17)
 
-# Игнорируем SSL, если твоя система всё еще ругается на сертификаты
+# Игнорируем SSL для загрузки GTest
 set(CMAKE_TLS_VERIFY OFF)
 
-# --- БЛОК ТЕСТОВ ---
+# --- БЛОК ТЕСТОВ (Google Test) ---
 include(FetchContent)
 
 FetchContent_Declare(
@@ -15,12 +15,16 @@ FetchContent_Declare(
   DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 )
 
-# Для Windows: предотвращаем конфликты рантаймов
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-
 FetchContent_MakeAvailable(googletest)
 
 enable_testing()
+
+# --- ПУТИ К ЗАГОЛОВКАМ (ВАЖНО!) ---
+# Это заставит компилятор искать файлы в папке src
+include_directories(src)
+
+# --- ИСПОЛНЯЕМЫЕ ФАЙЛЫ ---
 
 # Основное приложение
 add_executable(RealCarMonitor 
@@ -34,5 +38,8 @@ add_executable(obd_tests
     src/obd_parser.cpp
 )
 
+# Указываем тестам, что они зависят от папки src и библиотеки GTest
+target_include_directories(obd_tests PRIVATE src)
 target_link_libraries(obd_tests GTest::gtest_main)
+
 add_test(NAME OBDParserTests COMMAND obd_tests)

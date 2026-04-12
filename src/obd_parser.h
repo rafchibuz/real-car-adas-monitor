@@ -3,33 +3,27 @@
 
 #include <string>
 #include <vector>
-#include <fstream>
-#include <stdexcept>
+
+enum class DriveStyle { SLOW = 0, NORMAL = 1, AGGRESSIVE = 2 };
 
 struct OBDRecord {
-    std::string timestamp;
-    double speed_kmh;
-    double engine_rpm;
-    double throttle_pos;
-    double coolant_temp;
-    double fuel_level;
-    double intake_air_temp;
-    std::string label; // SLOW, NORMAL, AGGRESSIVE
+    double speed;
+    double rpm;
+    double throttle;
+    double coolant;
+    double fuel;
+    double intake;
+    DriveStyle label;
 };
 
 class OBDParser {
 public:
-    explicit OBDParser(const std::string& filename);
-    int load(); 
+    int load(const std::string& filename);
     OBDRecord getRecord(int index) const;
-    int getCount() const { return _records.size(); }
+    static int styleToInt(const std::string& label);
 
 private:
-    std::string _filename;
-    std::vector<OBDRecord> _records;
-    
-    // Метод для определения стиля вождения по RPM и Speed
-    std::string determineLabel(double rpm, double speed);
+    std::vector<OBDRecord> records;
 };
 
 #endif

@@ -1,24 +1,29 @@
 #include <iostream>
-#include <iomanip>
 #include "obd_parser.h"
 
 int main() {
-    OBDParser parser("../data/dataset.csv");
-    int count = parser.load();
-    if (count <= 0) return 1;
+    OBDParser parser;
+    int count = parser.load("../data/obd_data.csv");
 
-    std::cout << std::left << std::setw(12) << "speed_kmh" << std::setw(12) << "engine_rpm" 
-              << std::setw(15) << "throttle_pos" << std::setw(15) << "coolant_temp" 
-              << std::setw(12) << "fuel_level" << std::setw(18) << "intake_air_temp" 
-              << "label" << std::endl;
-    std::cout << std::string(95, '-') << std::endl;
-
-    for (int i = 0; i < 5; ++i) {
-        OBDRecord r = parser.getRecord(i);
-        std::cout << std::left << std::setw(12) << r.speed_kmh << std::setw(12) << r.engine_rpm 
-                  << std::setw(15) << r.throttle_pos << std::setw(15) << r.coolant_temp 
-                  << std::setw(12) << r.fuel_level << std::setw(18) << r.intake_air_temp 
-                  << r.label << std::endl;
+    if (count == -1) {
+        std::cout << "File not found!" << std::endl;
+        return 1;
     }
+
+    std::cout << "Loaded " << count << " records." << std::endl;
+
+    int s = 0, n = 0, a = 0;
+    for (int i = 0; i < count; ++i) {
+        auto rec = parser.getRecord(i);
+        if (rec.label == DriveStyle::SLOW) s++;
+        else if (rec.label == DriveStyle::NORMAL) n++;
+        else a++;
+
+        if (i < 5) {
+            std::cout << "Record " << i << ": Speed=" << rec.speed << " RPM=" << rec.rpm << std::endl;
+        }
+    }
+
+    std::cout << "\nStats:\nSLOW: " << s << "\nNORMAL: " << n << "\nAGGRESSIVE: " << a << std::endl;
     return 0;
 }
