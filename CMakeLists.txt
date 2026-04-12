@@ -1,20 +1,38 @@
 cmake_minimum_required(VERSION 3.20)
 project(RealCarMonitor)
 
-set(CMAKE_CXX_STANDARD 17) # Стандарт C++17 [cite: 94]
+set(CMAKE_CXX_STANDARD 17)
 
-# Поиск OpenCV [cite: 95]
-set(OpenCV_DIR "C:/opencv/build/x64/vc16/lib")
+# Игнорируем SSL, если твоя система всё еще ругается на сертификаты
+set(CMAKE_TLS_VERIFY OFF)
 
-find_package(OpenCV REQUIRED)
-include_directories(${OpenCV_INCLUDE_DIRS})
+# --- БЛОК ТЕСТОВ ---
+include(FetchContent)
 
-# Настройка ONNX Runtime [cite: 96]
-set(ONNXRUNTIME_ROOT "C:/onnxruntime")
-include_directories(${ONNXRUNTIME_ROOT}/include)
-link_directories(${ONNXRUNTIME_ROOT}/lib)
+FetchContent_Declare(
+  googletest
+  URL https://github.com/google/googletest/archive/refs/heads/main.zip
+  DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+)
 
-# Собираем все файлы из src [cite: 97]
-file(GLOB_RECURSE SOURCES "src/*.cpp")
-add_executable(RealCarMonitor ${SOURCES})
-target_link_libraries(RealCarMonitor ${OpenCV_LIBS} onnxruntime)
+# Для Windows: предотвращаем конфликты рантаймов
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+FetchContent_MakeAvailable(googletest)
+
+enable_testing()
+
+# Основное приложение
+add_executable(RealCarMonitor 
+    src/main.cpp 
+    src/obd_parser.cpp
+)
+
+# Исполняемый файл тестов
+add_executable(obd_tests 
+    tests/test_obd_parser.cpp 
+    src/obd_parser.cpp
+)
+
+target_link_libraries(obd_tests GTest::gtest_main)
+add_test(NAME OBDParserTests COMMAND obd_tests)
