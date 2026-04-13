@@ -14,10 +14,7 @@ int main() {
             throw std::runtime_error("Dataset not found or empty!");
         }
 
-        ONNXClassifier classifier(
-            "C:/Users/rafchibus/real-car-adas-monitor/models/driver_classifier.onnx", 
-            "C:/Users/rafchibus/real-car-adas-monitor/models/normalization_params.json"
-        );
+        ONNXClassifier classifier("models/driver_classifier.onnx", "models/normalization_params.json");
 
         Dashboard db;
         
