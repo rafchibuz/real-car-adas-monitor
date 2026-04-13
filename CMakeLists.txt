@@ -18,27 +18,40 @@ FetchContent_MakeAvailable(googletest)
 
 enable_testing()
 
-# --- ШАГ 1.3: НАСТРОЙКА ONNX RUNTIME (Путь C:/onnxruntime) ---
-# Указываем корень, где ты распаковал либу
+# --- НАСТРОЙКА БИБЛИОТЕК ---
+
+# 1. OpenCV (Важно: путь к папке с OpenCVConfig.cmake)
+set(OpenCV_DIR "C:/opencv/build/x64/vc16/lib")
+find_package(OpenCV REQUIRED)
+
+# 2. ONNX Runtime
 set(ONNXRUNTIME_DIR "C:/onnxruntime")
 
-# Добавляем пути к заголовкам и библиотекам
-include_directories(src "${ONNXRUNTIME_DIR}/include")
-link_directories("${ONNXRUNTIME_DIR}/lib")
+# --- ПУТИ К ЗАГОЛОВКАМ (Headers) ---
+include_directories(
+    src 
+    "${ONNXRUNTIME_DIR}/include"
+    ${OpenCV_INCLUDE_DIRS}
+)
 
 # --- ИСПОЛНЯЕМЫЕ ФАЙЛЫ ---
 
-# Основное приложение (со всеми .cpp из src)
+# Основное приложение
 add_executable(RealCarMonitor 
     src/main.cpp 
     src/obd_parser.cpp
     src/onnx_classifier.cpp
+    src/dashboard.cpp
 )
 
-# Линковка ONNX
-target_link_libraries(RealCarMonitor PRIVATE onnxruntime)
+# Линковка библиотек
+# Для MSVC лучше указывать полный путь к .lib файлу ONNX
+target_link_libraries(RealCarMonitor PRIVATE 
+    "${ONNXRUNTIME_DIR}/lib/onnxruntime.lib"
+    ${OpenCV_LIBRARIES}
+)
 
-# Тесты
+# --- ТЕСТЫ ---
 add_executable(obd_tests 
     tests/test_obd_parser.cpp 
     src/obd_parser.cpp

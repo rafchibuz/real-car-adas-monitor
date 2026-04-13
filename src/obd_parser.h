@@ -22,6 +22,9 @@ public:
     OBDRecord getRecord(int index) const;
     static int styleToInt(const std::string& label);
 
+    // Добавляем этот метод:
+    int getRecordCount() const { return (int)records.size(); }
+
 private:
     std::vector<OBDRecord> records;
 };
